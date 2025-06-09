@@ -7,11 +7,13 @@ import InputLabel from '@mui/material/InputLabel';
 import Input from '@mui/material/Input';
 import InputAdornment from '@mui/material/InputAdornment';
 import { NumericFormat } from 'react-number-format';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreatePage = () => {
+    const apiBaseUrl = "http://localhost:5000";
     const [productData, setProductData] = useState({
-        productName: "",
+        name: "",
         price: "",
         image: ""
     })
@@ -24,7 +26,24 @@ const CreatePage = () => {
     }
 
     const handleClick = () => {
-        console.log("productData In save", productData)
+        fetch(`${apiBaseUrl}/api/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toast.success(`${data?.name} added successfully!`);
+                    setProductData({});
+                }
+                else {
+                    toast.error(`${data?.message}`);
+                }
+            })
+            .catch(error => console.log(error))
     }
 
     return (
@@ -39,7 +58,7 @@ const CreatePage = () => {
                     placeholder="Enter your product name"
                     // helperText="Incorrect entry."
                     onChange={(e) => {
-                        handleChange(e.target.value, "productName")
+                        handleChange(e.target.value, "name")
                     }}
                     variant="standard"
                 />
@@ -63,6 +82,7 @@ const CreatePage = () => {
                     variant="standard"
                 />
                 <Button variant="contained" onClick={() => handleClick()}>Add Product</Button>
+                <ToastContainer position="top-right" autoClose={3000} />
             </div>
         </div>
     )
